@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Euphemia Haynes — Mathematics as an Open Door: Movement I.
+"""Euphemia Haynes — Mathematics as an Open Door: Lesson I.
+
+(The code still calls the lessons "movements": file and class names were
+kept when the on-screen word became "Lesson". The whole film, both lessons
+with one set of credits, is ``HaynesFilm`` in haynes_film.py.)
 
 A standalone Manim prototype emphasizing kinetic mathematical imagery rather
 than PAM character blocking. Narration is mixed directly into the rendered
@@ -337,10 +341,11 @@ class SwingingDoor:
 # ---------------------------------------------------------------------------
 
 class NarratedScene(Scene):
-    """A scene whose narration clips come from an audio manifest.
+    """A scene whose narration clips come from audio manifests.
 
-    Movement I uses the defaults below. Another movement reuses this class
-    by subclassing it and overriding these three class attributes.
+    Lesson I uses the defaults below. Another lesson reuses this class by
+    subclassing it and overriding these three class attributes; a scene that
+    plays several lessons overrides :meth:`narration_sources` instead.
     """
 
     audio_dir: Path = AUDIO_DIR
@@ -352,21 +357,37 @@ class NarratedScene(Scene):
         self._audio_manifest = self._load_audio_manifest()
         self._clip_starts: dict[str, float] = {}
 
+    def narration_sources(self) -> list[tuple[Path, dict, str]]:
+        """(audio folder, text, script that generates the audio) per lesson."""
+        return [(self.audio_dir, self.text, self.audio_script)]
+
     def _load_audio_manifest(self) -> dict:
-        manifest_path = self.audio_dir / "audio_manifest.json"
-        if not manifest_path.exists():
-            raise FileNotFoundError(
-                f"Missing {manifest_path}. Generate narration first with:\n"
-                f"  python {self.audio_script}"
-            )
-        return json.loads(manifest_path.read_text())
+        """All clips from every source's manifest, each remembering its folder."""
+        merged: dict = {"clips": {}}
+        for audio_dir, _, script in self.narration_sources():
+            manifest_path = audio_dir / "audio_manifest.json"
+            if not manifest_path.exists():
+                raise FileNotFoundError(
+                    f"Missing {manifest_path}. Generate narration first with:\n"
+                    f"  python {script}"
+                )
+            for clip_id, clip in json.loads(manifest_path.read_text())["clips"].items():
+                merged["clips"][clip_id] = dict(clip, _dir=str(audio_dir))
+        return merged
+
+    def narration_text(self, clip_id: str) -> str:
+        for _, text, _ in self.narration_sources():
+            if clip_id in text.get("narration", {}):
+                narration = text["narration"][clip_id]
+                return " ".join(narration) if isinstance(narration, list) else narration
+        return ""
 
     def narration_duration(self, clip_id: str) -> float:
         return float(self._audio_manifest["clips"][clip_id]["duration"])
 
     def start_narration(self, clip_id: str) -> float:
         clip = self._audio_manifest["clips"][clip_id]
-        path = self.audio_dir / clip["file"]
+        path = Path(clip["_dir"]) / clip["file"]
         if not path.exists():
             raise FileNotFoundError(path)
         self.add_sound(str(path))
@@ -397,8 +418,7 @@ class NarratedScene(Scene):
                 frac = at / max(len(seg["text"]), 1)
                 return self._clip_starts[clip_id] + seg["start"] + frac * (seg_end - seg["start"])
 
-        narration = self.text["narration"][clip_id]
-        text = " ".join(narration) if isinstance(narration, list) else narration
+        text = self.narration_text(clip_id)
         at = find(text)
         if at < 0:
             return None
@@ -424,19 +444,26 @@ class NarratedScene(Scene):
 # ---------------------------------------------------------------------------
 
 class HaynesMovementOne(NarratedScene):
-    """Movement I — Haynes's philosophy of teaching mathematics."""
+    """Lesson I — Haynes's philosophy of teaching mathematics."""
+
+    #: Credits line naming what this render contains (``{lessons}`` in the credits).
+    lessons_credit: str = TEXT["lessons_credit"]
 
     def construct(self):
+        self.title_card()
+        self.lesson_one()
+        self.end_credits()
+
+    def lesson_one(self):
+        """Lesson I without the title card and credits (the film reuses it)."""
         self.camera.background_color = "#10131a"
         self._opening_transition = None
-        self.title_card()
         self.opening_computation_to_structure()
         self.scene_answer_to_reason()
         self.scene_inquiry_epicycloid()
         self.scene_constant_variable()
         self.scene_relationships()
         self.scene_degrees_of_freedom()
-        self.end_credits()
 
     # ------------------------------------------------------------------
     # Opening: calculation -> mathematical structure -> title -> door
@@ -1125,7 +1152,14 @@ class HaynesMovementOne(NarratedScene):
     def _portrait(self) -> ImageMobject:
         if not PORTRAIT_PATH.exists():
             raise FileNotFoundError(PORTRAIT_PATH)
-        return ImageMobject(str(PORTRAIT_PATH))
+        from PIL import Image
+        pixels = np.array(Image.open(PORTRAIT_PATH).convert("RGBA"))
+        # The drawing has a stray vertical stroke in its first few columns
+        # (rows ~240-780), which shows as a line down the board where the
+        # title card continues it. Cover it with the columns just to its
+        # right, which hold only the board's horizontal lines there.
+        pixels[200:820, 0:10] = pixels[200:820, 10:20]
+        return ImageMobject(pixels)
 
     def title_card(self):
         """Haynes beside her easel; the board extends across the screen.
@@ -1147,24 +1181,64 @@ class HaynesMovementOne(NarratedScene):
 
         board_left = -config.frame_width / 2 + 0.45
         frame_w = 70 * px                          # thickness of board frame
-        board_rows = (426, 486, 496, 1214, 1227)   # frame lines at the cut
-        border_rows = (8, 1394)                    # the drawing's own border
 
-        lines = VGroup()
-        for row in board_rows:
-            inset = 0.0 if row in (426, 1227) else (frame_w if row != 486 else frame_w * 0.85)
-            lines.add(Line([left_x, y_of(row), 0], [board_left + inset, y_of(row), 0]))
-        for row in border_rows:
-            lines.add(Line([left_x, y_of(row), 0], [-config.frame_width / 2, y_of(row), 0]))
+        def x_of(col):                             # image column -> scene x
+            return left_x + col * px
+
+        # Rows (in the drawing) of the board's lines where the drawing is cut.
+        top_outer, top_bevel, top_inner = 426.5, 487, 497
+        bot_inner, bot_bevel, bot_outer = 1214, 1226, 1284   # outer: behind the tray
+        tray_top, tray_edge, tray_bottom = 1276, 1282, 1302  # the chalk tray, in front
+        border_rows = (5, 1393.5)                  # the drawing's own border
+        tray_left = board_left + 0.9 * frame_w
+
+        def hline(row, x_end):
+            return Line([left_x, y_of(row), 0], [x_end, y_of(row), 0])
+
+        lines = VGroup(
+            hline(top_outer, board_left),
+            hline(top_bevel, board_left + 0.85 * frame_w),
+            hline(top_inner, board_left + frame_w),
+            hline(bot_inner, board_left + frame_w),
+            hline(bot_bevel, board_left + 0.85 * frame_w),
+            # The drawing's top border starts ~20 px in; overlap it so they join.
+            *[Line([x_of(22), y_of(r), 0], [-config.frame_width / 2, y_of(r), 0])
+              for r in border_rows],
+        )
         sides = VGroup(
-            Line([board_left, y_of(426), 0], [board_left, y_of(1227), 0]),
-            Line([board_left + frame_w, y_of(496), 0], [board_left + frame_w, y_of(1214), 0]),
-            Line([board_left + 0.85 * frame_w, y_of(486), 0],
-                 [board_left + 0.85 * frame_w, y_of(1220), 0]),
-            Line([board_left, y_of(426), 0], [board_left + frame_w, y_of(496), 0]),
-            Line([board_left, y_of(1227), 0], [board_left + frame_w, y_of(1214), 0]),
+            Line([board_left, y_of(top_outer), 0], [board_left, y_of(bot_outer), 0]),
+            Line([board_left + frame_w, y_of(top_inner), 0],
+                 [board_left + frame_w, y_of(bot_inner), 0]),
+            Line([board_left + 0.85 * frame_w, y_of(top_bevel), 0],
+                 [board_left + 0.85 * frame_w, y_of(bot_bevel), 0]),
+            Line([board_left, y_of(top_outer), 0], [board_left + frame_w, y_of(top_inner), 0]),
+            Line([board_left, y_of(bot_outer), 0], [board_left + frame_w, y_of(bot_inner), 0]),
+            Line([board_left, y_of(bot_outer), 0], [tray_left, y_of(bot_outer), 0]),
         )
         VGroup(lines, sides).set_stroke(CHALK, width=2.2)
+
+        # The chalk tray runs in front of the bottom rail, as in the drawing,
+        # and ends in a rounded cap (like its other end in the drawing).
+        cap_r = (y_of(tray_top) - y_of(tray_bottom)) / 2
+        cap_center = np.array([tray_left + cap_r, (y_of(tray_top) + y_of(tray_bottom)) / 2, 0])
+        tray = VMobject()
+        tray.start_new_path(np.array([left_x, y_of(tray_top), 0.0]))
+        tray.add_line_to(cap_center + cap_r * UP)
+        tray.append_points(Arc(radius=cap_r, start_angle=PI / 2, angle=PI,
+                               arc_center=cap_center).points)
+        tray.add_line_to(np.array([left_x, y_of(tray_bottom), 0.0]))
+        tray.set_fill(self.camera.background_color, opacity=1).set_stroke(CHALK, width=2.2)
+        tray_edge_line = Line(cap_center + cap_r * 0.55 * UP + 0.12 * cap_r * LEFT,
+                              [left_x, y_of(tray_edge), 0]).set_stroke(CHALK, width=1.8)
+        tray_group = VGroup(tray, tray_edge_line).set_z_index(1)
+        lines.add(tray_group)
+
+        grain = self._wood_grain(
+            x_seam=x_of(18), y_of=y_of, px=px,
+            board_left=board_left, frame_w=frame_w,
+            top=(top_outer, top_bevel), bottom=(bot_bevel, tray_top),
+            stile_rows=(top_outer, bot_outer),
+        )
 
         # The board's writing surface, between the extended frame lines.
         inner_left = board_left + frame_w
@@ -1207,7 +1281,7 @@ class HaynesMovementOne(NarratedScene):
 
         # The board grows out of the drawing toward the left.
         self.play(Create(lines), run_time=1.3, rate_func=rate_functions.ease_out_sine)
-        self.play(Create(sides), run_time=0.6)
+        self.play(Create(sides), Create(grain, lag_ratio=0.05), run_time=0.9)
 
         # Chalk title.
         self.play(Write(name), run_time=2.2)
@@ -1216,10 +1290,85 @@ class HaynesMovementOne(NarratedScene):
         self.wait(2.4)
 
         self.play(
-            FadeOut(Group(portrait, lines, sides, name, subtitle, flourish, dates)),
+            FadeOut(Group(portrait, lines, sides, grain, name, subtitle, flourish, dates)),
             run_time=1.4,
         )
         self.wait(0.3)
+
+    def _wood_grain(self, *, x_seam, y_of, px, board_left, frame_w, top, bottom,
+                    stile_rows, seed: int = 1943) -> VGroup:
+        """Wood grain for the part of the board frame drawn in Manim.
+
+        The drawing's rails have grain lines that taper off just before its
+        left edge; lines here begin a few pixels inside the drawing at those
+        same rows, so they join without a gap, then wander gently along the
+        rail. A few more start partway along, and the left stile gets
+        vertical grain, like the stile in the drawing. Rows are the
+        drawing's pixel rows (``y_of`` converts them).
+        """
+        rng = np.random.default_rng(seed)
+        bg = self.camera.background_color
+        # Thinner and a little softer than the outlines, like the drawing's grain.
+        width = 0.95
+        GRAIN = interpolate_color(ManimColor(CHALK), ManimColor(bg), 0.18)
+        group = VGroup()
+
+        def wavy(x0, x1, row0, lane, lo, hi):
+            """A grain line from x0 leftward to x1, starting at row0."""
+            k1 = TAU / (px * rng.uniform(420, 620))
+            k2 = TAU / (px * rng.uniform(170, 260))
+            a1, a2 = rng.uniform(1.5, 3.0), rng.uniform(0.6, 1.4)
+            p1, p2 = rng.uniform(0, TAU), rng.uniform(0, TAU)
+            blend = 160 * px
+
+            def row(x):
+                w = min(abs(x0 - x) / blend, 1.0)
+                w = w * w * (3 - 2 * w)
+                wave = a1 * (math.sin(k1 * x + p1) - math.sin(k1 * x0 + p1)) \
+                    + a2 * (math.sin(k2 * x + p2) - math.sin(k2 * x0 + p2))
+                return float(np.clip((1 - w) * row0 + w * lane + wave, lo, hi))
+
+            return ParametricFunction(
+                lambda t: np.array([x0 + t * (x1 - x0), y_of(row(x0 + t * (x1 - x0))), 0.0]),
+                t_range=[0, 1, 0.01],
+            )
+
+        def rail(rows_from_drawing, lo, hi, x_end):
+            inner = (lo + 4, hi - 4)
+            lanes = np.linspace(*inner, len(rows_from_drawing) + 2)[1:-1]
+            for row0, lane in zip(rows_from_drawing, lanes):
+                end = x_end + rng.uniform(0.0, 0.5)
+                line = wavy(x_seam, end, row0, lane, *inner)
+                # Solid where it meets the drawing, fading toward its far end.
+                group.add(line.set_stroke([GRAIN, GRAIN, bg], width=width))
+            # Shorter lines that start and end along the rail.
+            for _ in range(3):
+                a = rng.uniform(x_end + 0.6, x_seam - 1.6)
+                b = a - rng.uniform(1.2, 2.8)
+                lane = rng.uniform(*inner)
+                line = wavy(a, max(b, x_end), lane, lane, *inner)
+                group.add(line.set_stroke([bg, GRAIN, bg], width=width))
+
+        stile_x = board_left + frame_w
+        rail((440, 451, 466, 482), top[0], top[1], stile_x + 0.05)
+        rail((1236.5, 1243, 1256.5, 1266.5), bottom[0], bottom[1], stile_x + 0.05)
+
+        # Vertical grain in the left stile, inside its mitered corners.
+        top_row, bottom_row = stile_rows
+        miter = frame_w / px                       # miter depth in rows
+        for f in (0.22, 0.42, 0.63, 0.8):
+            x = board_left + f * frame_w
+            r0, r1 = top_row + f * miter + 6, bottom_row - f * miter - 6
+            k = TAU / (px * rng.uniform(260, 380))
+            a, ph = rng.uniform(0.8, 1.6) * px, rng.uniform(0, TAU)
+            line = ParametricFunction(
+                lambda t, x=x, r0=r0, r1=r1, k=k, a=a, ph=ph: np.array([
+                    x + a * math.sin(k * (r0 + t * (r1 - r0)) * px + ph),
+                    y_of(r0 + t * (r1 - r0)), 0.0]),
+                t_range=[0, 1, 0.01],
+            )
+            group.add(line.set_stroke([bg, GRAIN, GRAIN, bg], width=width))
+        return group
 
     # ------------------------------------------------------------------
     # End credits
@@ -1264,7 +1413,7 @@ class HaynesMovementOne(NarratedScene):
             if kind == "quotations":
                 entries.extend(self._quotation_credits())
             else:
-                entries.append((kind, text))
+                entries.append((kind, text.replace("{lessons}", self.lessons_credit)))
 
         roll = VGroup()
         y = 0.0
@@ -1312,8 +1461,11 @@ class HaynesMovementOne(NarratedScene):
         q = TEXT.get("quotations")
         if not q:
             return []
+        # Quotations from every lesson in this render, in film order.
+        items = [item for _, text, _ in self.narration_sources()
+                 for item in text.get("quotations", {}).get("items", [])]
         lines = [("h", q.get("heading", "Quotations"))]
-        for item in q["items"]:
+        for item in items:
             seconds = self.quote_time(item["clip"], item["starts_with"])
             if seconds is None:
                 stamp = "--:--:--"

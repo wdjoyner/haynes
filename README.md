@@ -1,7 +1,11 @@
 # Euphemia Haynes — Mathematics as an Open Door
 
 An animated film about the mathematician and teacher Euphemia Lofton Haynes
-(1890–1980), made with Manim. Movement I is complete; Movement II is in planning.
+(1890–1980), made with Manim. It has two lessons: Lesson I is complete; Lesson II is in progress.
+
+In the code and file names the lessons are still called movements
+(`haynes_movement1.py` is Lesson I, `haynes_movement2.py` is Lesson II); only
+the on-screen word changed.
 
 Movement I does not depend on PAM for its visuals. The `haynes_scene1.json` /
 `generate_scene1_audio.py` pair is an earlier PAM stick-figure scene and does
@@ -69,7 +73,21 @@ The narration is embedded in that MP4; no separate ffmpeg merge step is required
 manim -pqh haynes_movement1.py HaynesMovementOne
 ```
 
-## Movement II (in progress)
+## The whole film
+
+`haynes_film.py` plays the title card, Lesson I, Lesson II and one set of end
+credits, as a single render. The quotation time stamps in the credits count
+from the start of the film, and "We will teach … we will inspire" closes it
+once. Generate both lessons' narration first, then:
+
+```bash
+manim -pql haynes_film.py HaynesFilm    # preview
+manim -pqh haynes_film.py HaynesFilm    # 1080p
+```
+
+Each lesson can still be rendered alone (with its own credits) for quick checks.
+
+## Lesson II (in progress)
 
 Built so far: scene 11 (duality) and the Simson-line part of the closing.
 See `MOVEMENT2_PLAN.md` for the whole movement.
