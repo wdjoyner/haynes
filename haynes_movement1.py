@@ -337,25 +337,36 @@ class SwingingDoor:
 # ---------------------------------------------------------------------------
 
 class NarratedScene(Scene):
+    """A scene whose narration clips come from an audio manifest.
+
+    Movement I uses the defaults below. Another movement reuses this class
+    by subclassing it and overriding these three class attributes.
+    """
+
+    audio_dir: Path = AUDIO_DIR
+    text: dict = TEXT
+    audio_script: str = "generate_movement1_audio.py"
+
     def setup(self):
         super().setup()
         self._audio_manifest = self._load_audio_manifest()
         self._clip_starts: dict[str, float] = {}
 
     def _load_audio_manifest(self) -> dict:
-        if not MANIFEST_PATH.exists():
+        manifest_path = self.audio_dir / "audio_manifest.json"
+        if not manifest_path.exists():
             raise FileNotFoundError(
-                f"Missing {MANIFEST_PATH}. Generate narration first with:\n"
-                "  python generate_movement1_audio.py"
+                f"Missing {manifest_path}. Generate narration first with:\n"
+                f"  python {self.audio_script}"
             )
-        return json.loads(MANIFEST_PATH.read_text())
+        return json.loads(manifest_path.read_text())
 
     def narration_duration(self, clip_id: str) -> float:
         return float(self._audio_manifest["clips"][clip_id]["duration"])
 
     def start_narration(self, clip_id: str) -> float:
         clip = self._audio_manifest["clips"][clip_id]
-        path = AUDIO_DIR / clip["file"]
+        path = self.audio_dir / clip["file"]
         if not path.exists():
             raise FileNotFoundError(path)
         self.add_sound(str(path))
@@ -386,8 +397,8 @@ class NarratedScene(Scene):
                 frac = at / max(len(seg["text"]), 1)
                 return self._clip_starts[clip_id] + seg["start"] + frac * (seg_end - seg["start"])
 
-        text = " ".join(TEXT["narration"][clip_id]) if isinstance(
-            TEXT["narration"][clip_id], list) else TEXT["narration"][clip_id]
+        narration = self.text["narration"][clip_id]
+        text = " ".join(narration) if isinstance(narration, list) else narration
         at = find(text)
         if at < 0:
             return None

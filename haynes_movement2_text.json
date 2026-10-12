@@ -1,0 +1,83 @@
+{
+  "_about": [
+    "All words in Euphemia Haynes, Movement II: what is spoken and what appears on screen.",
+    "Edit text here; haynes_movement2.py and generate_movement2_audio.py both read this file.",
+    "After changing any 'narration', rerun generate_movement2_audio.py to rebuild the audio.",
+    "Narration may be one string or a list of sentences (they are joined with spaces).",
+    "The animation waits for some sentences to be spoken before showing what they describe; it finds them by the words in the 'cue' entries below, so keep each cue word-for-word the same as in the narration.",
+    "Count labels like \"cusps {cusps}\" get their numbers from haynes_curves.py, which computes them from Haynes's curve."
+  ],
+  "narration": {
+    "m2_11_duality": [
+      "A curve can be seen in two ways: as a path of points, or as the family of lines that touch it.",
+      "Here is the three-cuspided quartic from Haynes's thesis.",
+      "Roll a tangent line around it, and record each line as a single point.",
+      "Those points draw a second curve, the dual.",
+      "Each cusp becomes a point of inflection.",
+      "And the one line that touches the quartic twice, at two invisible complex points, becomes a lone isolated point.",
+      "Now let the curve change.",
+      "Its shape moves, but its counts do not.",
+      "Degree, cusps, and bitangents, with their partners in the dual, stay fixed.",
+      "Haynes described invariance as that which remains stable in midst of change."
+    ],
+    "m2_closing_simson": [
+      "Return to the right triangle with sides three, four, and five.",
+      "Pick any point on the circle through its corners, and drop perpendiculars to the three sides.",
+      "The three feet always fall on a single line, called the Simson line.",
+      "As the point travels once around the circle, its Simson lines sweep out a curve.",
+      "It is the same three-cuspided quartic.",
+      "Classroom geometry and thesis geometry turn out to be one structure."
+    ]
+  },
+  "duality": {
+    "_note": "Scene 11. Haynes's equation is in her own coordinates; the curve on screen is the same curve after a projective change of coordinates.",
+    "equation": "X^2Y^2+Y^2Z^2+Z^2X^2-2XYZ(X+Y+Z)=0",
+    "caption": "Haynes, 1943: a three-cuspided quartic",
+    "curve_title": "POINTS",
+    "dual_title": "TANGENT LINES",
+    "curve_counts": ["degree {degree}", "cusps {cusps}", "bitangents {bitangents}"],
+    "dual_counts": ["degree {class}", "flexes {cusps}", "nodes {bitangents}"],
+    "relation": "RELATION",
+    "invariance": "INVARIANCE",
+    "structure": "STRUCTURE",
+    "cues": {
+      "curve": "Here is the three-cuspided",
+      "roll": "Roll a tangent line",
+      "cusp": "Each cusp becomes",
+      "node": "becomes a lone isolated point",
+      "change": "Now let the curve change",
+      "counts": "Degree, cusps",
+      "invariance": "Haynes described invariance"
+    }
+  },
+  "simson": {
+    "_note": "Closing. The 3-4-5 triangle of Movement I; side labels in the same places as there.",
+    "side_labels": ["4", "3", "5"],
+    "simson_line": "SIMSON LINE",
+    "curve_label": "THREE-CUSPIDED QUARTIC",
+    "structure": "ONE STRUCTURE",
+    "cues": {
+      "point": "Pick any point",
+      "line": "The three feet",
+      "sweep": "As the point travels",
+      "same": "It is the same",
+      "structure": "Classroom geometry"
+    }
+  },
+  "quotations": {
+    "_note": [
+      "Same format as in haynes_movement1_text.json, for Movement II's credits (not built yet).",
+      "Each item names the narration clip and the opening words of the quote exactly as they appear in that clip's narration."
+    ],
+    "heading": "Quotations",
+    "template": "Haynes’ quote “{excerpt}” (around {time}) is from {source}.",
+    "items": [
+      {
+        "clip": "m2_11_duality",
+        "starts_with": "that which remains stable",
+        "excerpt": "…that which remains stable in midst of change…",
+        "source": "her address “Mathematics — Symbolic Logic” to teachers of mathematics in junior and senior high schools, Washington, D.C., 1945"
+      }
+    ]
+  }
+}

@@ -69,6 +69,27 @@ The narration is embedded in that MP4; no separate ffmpeg merge step is required
 manim -pqh haynes_movement1.py HaynesMovementOne
 ```
 
+## Movement II (in progress)
+
+Built so far: scene 11 (duality) and the Simson-line part of the closing.
+See `MOVEMENT2_PLAN.md` for the whole movement.
+
+- `haynes_movement2_text.json` — every word in Movement II, as for Movement I.
+- `haynes_movement2.py` — the Manim scenes. It imports `CurveText`, `write_along`, the narration timing and CHALK from `haynes_movement1.py`.
+- `haynes_curves.py` — the thesis curves from `haynes-project-code_goins2.sage` (Goins and Joyner), ported to plain Python/numpy so Sage is not needed to render.
+- `check_haynes_curves.py` — checks that port against the Sage algorithm (redone in sympy) and the outputs recorded in the Sage docstrings. Run `python check_haynes_curves.py`; it needs `pip install sympy`.
+- `generate_movement2_audio.py` — narration for Movement II. With `--placeholder` it writes silent clips of estimated length instead, for previewing before recording.
+
+```bash
+python generate_movement2_audio.py --voice af_heart --speed 0.94
+manim -pql haynes_movement2.py HaynesMovementTwo     # whole movement so far
+manim -pql haynes_movement2.py DualityScene          # scene 11 only
+manim -pql haynes_movement2.py SimsonClosing         # closing only
+```
+
+Each Movement II beat waits for the sentence that describes it (found by the
+`cues` in the text file), so re-recording the narration keeps it in sync.
+
 ## Notes
 
 - The animation requires the generated `audio_manifest.json`; if it is absent, the scene stops with an explicit instruction to run the audio generator.
