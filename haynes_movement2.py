@@ -379,20 +379,6 @@ class MovementTwoScene(NarratedScene):
         super().setup()
         self.camera.background_color = BACKGROUND
 
-    def time_until(self, clip_id: str, starts_with: str) -> float:
-        """Seconds from now until the sentence starting with these words is spoken."""
-        at = self.quote_time(clip_id, starts_with)
-        if at is None:
-            raise ValueError(f"{starts_with!r} is not in the narration of {clip_id}; "
-                             "check the cues in haynes_movement2_text.json")
-        return at - self.renderer.time
-
-    def wait_for(self, clip_id: str, starts_with: str, lead: float = 0.0):
-        """Wait until *lead* seconds before the sentence is spoken (if not already past)."""
-        remaining = self.time_until(clip_id, starts_with) - lead
-        if remaining > 1 / config.frame_rate:
-            self.wait(remaining)
-
     def finish_clip(self, clip_id: str, minimum_pause: float = 0.4):
         """Wait out the rest of a narration clip."""
         end = self._clip_starts[clip_id] + self.narration_duration(clip_id)

@@ -424,6 +424,20 @@ class NarratedScene(Scene):
             return None
         return self._clip_starts[clip_id] + clip["duration"] * at / max(len(text), 1)
 
+    def time_until(self, clip_id: str, starts_with: str) -> float:
+        """Seconds from now until these words are spoken in a narration clip."""
+        at = self.quote_time(clip_id, starts_with)
+        if at is None:
+            raise ValueError(f"{starts_with!r} is not in the narration of {clip_id}; "
+                             "check the 'cues' in the text file")
+        return at - self.renderer.time
+
+    def wait_for(self, clip_id: str, starts_with: str, lead: float = 0.0):
+        """Wait until *lead* seconds before these words are spoken (if not already past)."""
+        remaining = self.time_until(clip_id, starts_with) - lead
+        if remaining > 1 / config.frame_rate:
+            self.wait(remaining)
+
     def finish_narration(
         self,
         duration: float,
@@ -578,24 +592,33 @@ class HaynesMovementOne(NarratedScene):
     # ------------------------------------------------------------------
 
     def scene_answer_to_reason(self):
-        dur = self.start_narration("m1_01_reason")
-        elapsed = 0.0
-
+        clip = "m1_01_reason"
+        dur = self.start_narration(clip)
         words = TEXT["reason"]
+        cue = words["cues"]
+
+        # Everything before UNDERSTANDS (equation, triangle, squares, areas)
+        # is paced to finish just as "He understands it" is spoken, so each
+        # word appears with its own sentence; its natural length is 13.7 s.
+        before_words = 13.7
+        pace = float(np.clip((self.time_until(clip, cue["understands"]) - 0.2) / before_words,
+                             0.45, 1.0))
+
+        def rt(seconds):
+            return seconds * pace
+
         equation = MathTex(words["equation"]).scale(1.55)
         opening_fade = []
         if self._opening_transition is not None:
             opening_fade.append(FadeOut(self._opening_transition))
             self._opening_transition = None
-        self.play(Write(equation), *opening_fade, run_time=1.8)
+        self.play(Write(equation), *opening_fade, run_time=rt(1.8))
 
         check = Text("✓", font_size=64).next_to(equation, RIGHT)
-        self.play(FadeIn(check, scale=1.4), run_time=0.7)
-        self.wait(0.6)
-        elapsed += 3.1
+        self.play(FadeIn(check, scale=1.4), run_time=rt(0.7))
+        self.wait(rt(0.6))
 
-        self.play(FadeOut(check), equation.animate.to_edge(UP), run_time=1.2)
-        elapsed += 1.2
+        self.play(FadeOut(check), equation.animate.to_edge(UP), run_time=rt(1.2))
 
         # A 3-4-5 triangle with its three squares spans 7 units vertically
         # at unit scale; s = 0.48 keeps the whole figure below the equation.
@@ -614,9 +637,8 @@ class HaynesMovementOne(NarratedScene):
         self.play(
             Create(tri),
             LaggedStart(*[FadeIn(x) for x in labels], lag_ratio=0.15),
-            run_time=2.2,
+            run_time=rt(2.2),
         )
-        elapsed += 2.2
 
         sq4 = square_on_segment(A, B, outward_sign=-1)
         sq3 = square_on_segment(B, C, outward_sign=-1)
@@ -624,9 +646,8 @@ class HaynesMovementOne(NarratedScene):
         squares = VGroup(sq4, sq3, sq5)
         self.play(
             LaggedStart(*[Create(s) for s in squares], lag_ratio=0.2),
-            run_time=3.4,
+            run_time=rt(3.4),
         )
-        elapsed += 3.4
 
         areas = VGroup(
             MathTex("16").scale(0.85).move_to(sq4.get_center()),
@@ -635,11 +656,10 @@ class HaynesMovementOne(NarratedScene):
         )
         self.play(
             LaggedStart(*[FadeIn(a, scale=0.7) for a in areas], lag_ratio=0.22),
-            run_time=1.6,
+            run_time=rt(1.6),
         )
-        self.play(Indicate(areas[0]), Indicate(areas[1]), run_time=1.2)
-        self.play(Indicate(areas[2]), run_time=1.0)
-        elapsed += 3.8
+        self.play(Indicate(areas[0]), Indicate(areas[1]), run_time=rt(1.2))
+        self.play(Indicate(areas[2]), run_time=rt(1.0))
 
         # A gentle arc in the open space to the right of the figure.
         understands_arc = Arc(
@@ -657,14 +677,17 @@ class HaynesMovementOne(NarratedScene):
             normal_offset=0.22,
         )
         understands_arc.set_stroke(opacity=0.35)
+        # UNDERSTANDS is written as "He understands it" is spoken ...
+        self.wait_for(clip, cue["understands"])
         self.play(
             Create(understands_arc),
             write_along(curved_word),
             run_time=2.6,
         )
-        elapsed += 2.6
 
+        # ... and IMPOSED drops in on "imposed".
         imposed = Text(words["imposed"], weight=BOLD).scale(1.0).to_edge(DOWN)
+        self.wait_for(clip, cue["imposed"], lead=0.5)
         self.play(FadeIn(imposed, shift=2 * DOWN), run_time=0.8)
         self.play(
             imposed.animate.shift(0.25 * DOWN),
@@ -672,9 +695,8 @@ class HaynesMovementOne(NarratedScene):
             rate_func=there_and_back,
         )
         self.play(FadeOut(imposed), run_time=0.5)
-        elapsed += 1.55
 
-        self.finish_narration(dur, elapsed)
+        self.finish_narration(dur, self.renderer.time - self._clip_starts[clip])
         self.play(
             FadeOut(VGroup(equation, tri, labels, squares, areas, curved_word,
                            understands_arc)),
