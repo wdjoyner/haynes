@@ -21,7 +21,6 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from kokoro import KPipeline
 
 SAMPLE_RATE = 24000
 
@@ -94,6 +93,10 @@ def main() -> None:
     here = Path(__file__).resolve().parent
     audio_dir = here / "audio" / "movement1"
     audio_dir.mkdir(parents=True, exist_ok=True)
+
+    # Imported here so other scripts can reuse this file's helpers
+    # (e.g. generate_movement2_audio.py --placeholder) without Kokoro.
+    from kokoro import KPipeline
 
     pipeline = KPipeline(lang_code=args.lang)
     manifest = {
