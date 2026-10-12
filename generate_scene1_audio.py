@@ -5,15 +5,15 @@ PAM wait actions to the measured WAV durations.
 
 Run from the PAM repository root:
 
-    python haynes/generate_scene1_audio.py \
-        --scene haynes/haynes_scene1.json \
+    python generate_scene1_audio.py \
+        --scene haynes_scene1.json \
         --voice af_heart \
         --speed 0.94
 
 Outputs:
-    haynes/audio/scene01/s01_narr_01.wav
-    haynes/audio/scene01/s01_narr_02.wav
-    haynes/audio/scene01/audio_manifest.json
+    audio/scene01/s01_narr_01.wav
+    audio/scene01/s01_narr_02.wav
+    audio/scene01/audio_manifest.json
 
 The script also updates the two narration wait durations in the JSON file.
 """
@@ -96,7 +96,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--scene",
-        default="haynes/haynes_scene1.json",
+        default=str(Path(__file__).resolve().parent / "haynes_scene1.json"),
         help="PAM Scene 1 JSON file to patch.",
     )
     parser.add_argument("--voice", default="af_heart", help="Kokoro voice ID.")

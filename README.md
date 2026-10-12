@@ -1,7 +1,11 @@
-# Euphemia Haynes — Movement I Manim prototype
+# Euphemia Haynes — Mathematics as an Open Door
 
-This is the Manim-first prototype for **Euphemia Haynes — Mathematics as an Open Door**.
-It does not depend on PAM for its visuals.
+An animated film about the mathematician and teacher Euphemia Lofton Haynes
+(1890–1980), made with Manim. Movement I is complete; Movement II is in planning.
+
+Movement I does not depend on PAM for its visuals. The `haynes_scene1.json` /
+`generate_scene1_audio.py` pair is an earlier PAM stick-figure scene and does
+need PAM installed.
 
 ## Files
 
@@ -11,26 +15,29 @@ It does not depend on PAM for its visuals.
 - `assets/haynes_portrait_lineart.png` — public-domain line drawing of Haynes, converted to cream line art on a transparent background; used by the title card and the end credits.
 - `audio/movement1/` — generated locally; WAV files are not committed by this setup.
 
-## 1. Activate the environment
-
-From the repository root:
+## 1. Get the code (first time only)
 
 ```bash
-cd ~/Projects/pam
-source .venv/bin/activate
+cd ~/Projects
+git clone https://github.com/wdjoyner/haynes.git
+cd haynes
 ```
 
-## 2. Pull the Haynes branch
+## 2. Activate the environment
+
+The film needs Manim and Kokoro, which are already installed in PAM's
+environment, so reuse it:
 
 ```bash
-git checkout haynes-animation
-git pull
+source ~/Projects/pam/.venv/bin/activate
 ```
 
-## 3. Generate narration
+To pick up later changes, run `git pull` inside `~/Projects/haynes`.
+
+## 3. Generate narration (from inside `haynes/`)
 
 ```bash
-python haynes/generate_movement1_audio.py \
+python generate_movement1_audio.py \
     --voice af_heart \
     --speed 0.94
 ```
@@ -38,19 +45,19 @@ python haynes/generate_movement1_audio.py \
 Expected output:
 
 ```text
-haynes/audio/movement1/m1_00_opening.wav
-haynes/audio/movement1/m1_01_reason.wav
-haynes/audio/movement1/m1_02_inquiry.wav
-haynes/audio/movement1/m1_03_constant_variable.wav
-haynes/audio/movement1/m1_04_relationships.wav
-haynes/audio/movement1/m1_05_freedom.wav
-haynes/audio/movement1/audio_manifest.json
+audio/movement1/m1_00_opening.wav
+audio/movement1/m1_01_reason.wav
+audio/movement1/m1_02_inquiry.wav
+audio/movement1/m1_03_constant_variable.wav
+audio/movement1/m1_04_relationships.wav
+audio/movement1/m1_05_freedom.wav
+audio/movement1/audio_manifest.json
 ```
 
 ## 4. Low-resolution preview
 
 ```bash
-manim -pql haynes/haynes_movement1.py HaynesMovementOne
+manim -pql haynes_movement1.py HaynesMovementOne
 ```
 
 Manim should write an MP4 under `media/videos/haynes_movement1/.../HaynesMovementOne.mp4`.
@@ -59,7 +66,7 @@ The narration is embedded in that MP4; no separate ffmpeg merge step is required
 ## 5. 1080p render
 
 ```bash
-manim -pqh haynes/haynes_movement1.py HaynesMovementOne
+manim -pqh haynes_movement1.py HaynesMovementOne
 ```
 
 ## Notes

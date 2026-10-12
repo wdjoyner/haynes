@@ -7,15 +7,15 @@ MP4 with ``Scene.add_sound``.
 
 Generate narration first::
 
-    python haynes/generate_movement1_audio.py --voice af_heart --speed 0.94
+    python generate_movement1_audio.py --voice af_heart --speed 0.94
 
 Low-resolution preview::
 
-    manim -pql haynes/haynes_movement1.py HaynesMovementOne
+    manim -pql haynes_movement1.py HaynesMovementOne
 
 1080p render::
 
-    manim -pqh haynes/haynes_movement1.py HaynesMovementOne
+    manim -pqh haynes_movement1.py HaynesMovementOne
 
 The script is written for Manim Community 0.22.x but intentionally uses only
 stable core classes and methods.
@@ -346,7 +346,7 @@ class NarratedScene(Scene):
         if not MANIFEST_PATH.exists():
             raise FileNotFoundError(
                 f"Missing {MANIFEST_PATH}. Generate narration first with:\n"
-                "  python haynes/generate_movement1_audio.py"
+                "  python generate_movement1_audio.py"
             )
         return json.loads(MANIFEST_PATH.read_text())
 

@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# Generated narration (rebuild with generate_movement1_audio.py)
+audio/
+
+# Manim render output
+media/
+
+# macOS
+.DS_Store

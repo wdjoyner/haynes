@@ -3,9 +3,9 @@
 
 Run from the repository root::
 
-    python haynes/generate_movement1_audio.py --voice af_heart --speed 0.94
+    python generate_movement1_audio.py --voice af_heart --speed 0.94
 
-Outputs are written to ``haynes/audio/movement1`` together with an
+Outputs are written to ``audio/movement1`` together with an
 ``audio_manifest.json`` file containing measured durations.  The Manim scene
 reads that manifest at render time, so narration timing does not need to be
 hard-coded into the animation source.
