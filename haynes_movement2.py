@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Euphemia Haynes — Mathematics as an Open Door: Movement II.
+"""Euphemia Haynes — Mathematics as an Open Door: Lesson II.
+
+(File and class names say "movement", from before the on-screen word became
+"Lesson". The whole film, both lessons with one set of credits, is
+``HaynesFilm`` in haynes_film.py.)
 
 What her Ph.D. work looked like (see MOVEMENT2_PLAN.md). Built so far:
 
@@ -365,7 +369,7 @@ class SimsonPicture:
 # ---------------------------------------------------------------------------
 
 class MovementTwoScene(NarratedScene):
-    """Movement I's narrated scene, pointed at Movement II's audio and text."""
+    """Lesson I's narrated scene, pointed at Lesson II's audio and text."""
 
     audio_dir = AUDIO_DIR
     text = TEXT
@@ -393,6 +397,25 @@ class MovementTwoScene(NarratedScene):
         """Wait out the rest of a narration clip."""
         end = self._clip_starts[clip_id] + self.narration_duration(clip_id)
         self.wait(max(end - self.renderer.time, minimum_pause))
+
+    def lesson_two(self):
+        """Lesson II, title and scenes built so far (the film reuses this)."""
+        self.camera.background_color = BACKGROUND
+        self.lesson_two_title()
+        self.scene_duality()
+        self.scene_simson_closing()
+
+    def lesson_two_title(self):
+        """LESSON II and its subtitle, styled like Lesson I's title."""
+        words = self.text["title"]
+        title = VGroup(
+            Text(words["lesson"], weight=BOLD, font_size=46),
+            Text(words["subtitle"], font_size=32),
+        ).arrange(DOWN, buff=0.28)
+        self.play(FadeIn(title, shift=0.18 * UP), run_time=1.4)
+        self.wait(1.8)
+        self.play(FadeOut(title, shift=0.16 * UP), run_time=1.0)
+        self.wait(0.3)
 
     # ------------------------------------------------------------------
     # Scene 11: duality
@@ -743,11 +766,10 @@ class MovementTwoScene(NarratedScene):
 
 
 class HaynesMovementTwo(MovementTwoScene):
-    """Movement II — what her Ph.D. work looked like (scenes built so far)."""
+    """Lesson II — what her Ph.D. work looked like (scenes built so far)."""
 
     def construct(self):
-        self.scene_duality()
-        self.scene_simson_closing()
+        self.lesson_two()
 
 
 class DualityScene(MovementTwoScene):

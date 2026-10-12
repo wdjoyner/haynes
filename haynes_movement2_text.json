@@ -1,6 +1,6 @@
 {
   "_about": [
-    "All words in Euphemia Haynes, Movement II: what is spoken and what appears on screen.",
+    "All words in Euphemia Haynes, Lesson II: what is spoken and what appears on screen.",
     "Edit text here; haynes_movement2.py and generate_movement2_audio.py both read this file.",
     "After changing any 'narration', rerun generate_movement2_audio.py to rebuild the audio.",
     "Narration may be one string or a list of sentences (they are joined with spaces).",
@@ -29,6 +29,15 @@
       "Classroom geometry and thesis geometry turn out to be one structure."
     ]
   },
+  "title": {
+    "_note": "Shown before Lesson II's first scene, like Lesson I's LESSON I / BEYOND COMPUTATION. The subtitle is a placeholder (MOVEMENT2_PLAN.md suggests Discovery).",
+    "lesson": "LESSON II",
+    "subtitle": "DISCOVERY"
+  },
+  "film": {
+    "_note": "Used only by HaynesFilm (haynes_film.py), which plays both lessons with one set of credits.",
+    "lessons_credit": "Lessons I and II"
+  },
   "duality": {
     "_note": "Scene 11. Haynes's equation is in her own coordinates; the curve on screen is the same curve after a projective change of coordinates.",
     "equation": "X^2Y^2+Y^2Z^2+Z^2X^2-2XYZ(X+Y+Z)=0",
@@ -51,7 +60,7 @@
     }
   },
   "simson": {
-    "_note": "Closing. The 3-4-5 triangle of Movement I; side labels in the same places as there.",
+    "_note": "Closing. The 3-4-5 triangle of Lesson I; side labels in the same places as there.",
     "side_labels": ["4", "3", "5"],
     "simson_line": "SIMSON LINE",
     "curve_label": "THREE-CUSPIDED QUARTIC",
@@ -66,7 +75,7 @@
   },
   "quotations": {
     "_note": [
-      "Same format as in haynes_movement1_text.json, for Movement II's credits (not built yet).",
+      "Same format as in haynes_movement1_text.json; listed in the full film's credits after Lesson I's quotations.",
       "Each item names the narration clip and the opening words of the quote exactly as they appear in that clip's narration."
     ],
     "heading": "Quotations",

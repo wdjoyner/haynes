@@ -1,6 +1,6 @@
 {
   "_about": [
-    "All words in Euphemia Haynes, Movement I: what is spoken and what appears on screen.",
+    "All words in Euphemia Haynes, Lesson I: what is spoken and what appears on screen.",
     "Edit text here; haynes_movement1.py and generate_movement1_audio.py both read this file.",
     "After changing any 'narration', rerun generate_movement1_audio.py to rebuild the audio.",
     "Narration may be one string or a list of sentences (they are joined with spaces).",
@@ -49,6 +49,8 @@
       "Mathematics can become an open door."
     ]
   },
+  "_lessons_credit_note": "Fills the {lessons} line of the credits when Lesson I is rendered on its own; the full film uses film.lessons_credit in haynes_movement2_text.json.",
+  "lessons_credit": "Lesson I",
   "title_card": {
     "name": "Euphemia Lofton Haynes",
     "subtitle": "Mathematics as an Open Door",
@@ -65,7 +67,7 @@
     ],
     "computation": "COMPUTATION",
     "structure": "STRUCTURE",
-    "movement_title": "MOVEMENT I",
+    "movement_title": "LESSON I",
     "movement_subtitle": "BEYOND COMPUTATION"
   },
   "reason": {
@@ -155,7 +157,7 @@
     ],
     [
       "t",
-      "Movement I"
+      "{lessons}"
     ],
     [
       "",
