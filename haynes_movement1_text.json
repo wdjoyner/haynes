@@ -73,7 +73,12 @@
   "reason": {
     "equation": "3^2+4^2=5^2",
     "understands": "UNDERSTANDS",
-    "imposed": "IMPOSED"
+    "imposed": "IMPOSED",
+    "_cues_note": "Each word appears when these words are spoken; keep them word-for-word the same as in the m1_01_reason narration.",
+    "cues": {
+      "understands": "He understands it",
+      "imposed": "been imposed"
+    }
   },
   "inquiry": {
     "_note": "Four words, in order around the ring (top right, top left, bottom left, bottom right).",
