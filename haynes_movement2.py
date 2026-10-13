@@ -693,60 +693,80 @@ class MovementTwoScene(NarratedScene):
         sweep = max(self.time_until(clip, cue["same"]) - 0.3, 6.0)
         self.play(theta.animate.set_value(theta0 + TAU), run_time=sweep, rate_func=linear)
 
-        # Sentence 5: the envelope is the three-cuspided quartic -- the
-        # curve from scene 11, flown in from where it stood.
+        # Sentence 5: the envelope is the three-cuspided quartic. It is
+        # labeled CLASSROOM GEOMETRY; the curve from scene 11 comes back,
+        # labeled THESIS GEOMETRY, and flies onto it. When they coincide,
+        # the two labels merge into ONE STRUCTURE.
         env = self.envelope_mob(geo)
         self.remove(trail_mob)
         trails_static = trails()
         self.add(trails_static)
-        self.play(FadeOut(feet), FadeOut(simson), FadeOut(point),
-                  trails_static.animate.set_stroke(opacity=0.09), Create(env),
-                  run_time=1.6)
 
-        # The deltoid as it stood in scene 11 turns, shrinks and settles
-        # exactly onto the envelope (a similarity; both are deltoids).
+        # Where each deltoid is: (scale, rotation, center) of the model
+        # deltoid (cusp radius 3, a cusp at angle 0).
         scale, angle, center = geo.deltoid_similarity()
         tp = TricuspidalPicture()
         model = hc.dehomogenize(tp.P0)
         start = (tp.CURVE_SCALE, tp.CURVE_ROTATION, tp.LEFT_CENTER)
         # Of the three cusp directions (120 degrees apart), turn to the nearest.
         angle += TAU / 3 * round((start[1] - angle) / (TAU / 3))
+
+        def under(m, sc, an, ce, gap):
+            """Place m level under a deltoid pose, between its two lowest cusps."""
+            tips = sorted((ce + 3 * sc * np.array([math.cos(an + k * TAU / 3),
+                                                   math.sin(an + k * TAU / 3)])
+                           for k in range(3)), key=lambda q: q[1])
+            x = (tips[0][0] + tips[1][0]) / 2
+            return m.move_to(np.array([x, tips[0][1] - gap, 0.0]))
+
+        def label(word, color, size=22):
+            return Text(word, font_size=size, weight=BOLD, color=color)
+
+        # CLASSROOM GEOMETRY sits under the Simson-line curve; THESIS
+        # GEOMETRY will come to rest just above it.
+        classroom = under(label(words["classroom_label"], CHALK), scale, angle, center, 0.72)
+        self.play(FadeOut(feet), FadeOut(simson), FadeOut(point),
+                  trails_static.animate.set_stroke(opacity=0.09), Create(env),
+                  write_along(classroom), run_time=1.6)
+
         fly = ValueTracker(0.0)
 
-        def ghost_mob():
+        def pose():
             w = smoothstep(fly.get_value())
-            sc = (1 - w) * start[0] + w * scale
-            an = (1 - w) * start[1] + w * angle
-            ce = (1 - w) * start[2] + w * center
+            return ((1 - w) * start[0] + w * scale, (1 - w) * start[1] + w * angle,
+                    (1 - w) * start[2] + w * center)
+
+        def ghost_mob():
+            sc, an, ce = pose()
             rot = np.array([[math.cos(an), -math.sin(an)], [math.sin(an), math.cos(an)]])
             return polyline_group([ce + sc * model @ rot.T], CUSP_COLOR, 4)
 
+        # THESIS GEOMETRY rides just below the flying curve, level so it
+        # reads cleanly while the curve turns.
+        thesis = under(label(words["thesis_label"], CUSP_COLOR), *start, 0.3)
         ghost = always_redraw(ghost_mob)
-        self.play(FadeIn(ghost), run_time=0.6)
-        self.play(fly.animate.set_value(1.0), run_time=2.2, rate_func=linear)
-        self.play(FadeOut(ghost), env.animate.set_stroke(CUSP_COLOR), run_time=0.8)
-        self.play(env.animate.set_stroke(CHALK), run_time=0.8)
+        self.play(FadeIn(ghost), write_along(thesis), run_time=1.0)
+        thesis.add_updater(lambda m: under(m, *pose(), 0.3))
 
-        # Along the bottom, between the two lower cusps (which point out at
-        # about 192 and 312 degrees from the deltoid's center).
-        _, cusp_angle, _ = geo.deltoid_similarity()
-        cusp_dirs = sorted((cusp_angle + k * TAU / 3) % TAU for k in range(3))
-        lower = [a for a in cusp_dirs if PI < a < TAU]
-        a0, a1 = (lower[0], lower[1]) if len(lower) == 2 else (1.1 * PI, 1.9 * PI)
-        quartic_arc = Arc(radius=geo.SCALE * 3 * geo.R / 2 + 0.25,
-                          start_angle=a0 + 0.2, angle=(a1 - a0) - 0.4,
-                          arc_center=_p3(geo.NINE_POINT_CENTER_SCREEN))
-        curve_label = CurveText(words["curve_label"], font_size=22, weight=BOLD,
-                                color=CHALK)
-        curve_label.place_on(quartic_arc, 0.0, 1.0, normal_offset=-0.05)
-        self.play(write_along(curve_label), run_time=1.6)
-
-        # Sentence 6: one structure.
+        # The flight lands just as "one structure" is spoken.
         self.wait_for(clip, cue["structure"])
-        top_arc = ArcBetweenPoints([-2.6, 3.25, 0], [2.6, 3.25, 0], angle=-0.6)
-        structure = CurveText(words["structure"], font_size=32, weight=BOLD, color=CHALK)
-        structure.place_on(top_arc, 0.05, 0.95, normal_offset=0.15)
-        self.play(write_along(structure), run_time=1.6)
+        flight = max(self.time_until(clip, cue["one"]) - 0.2, 2.2)
+        self.play(fly.animate.set_value(1.0), run_time=flight, rate_func=linear)
+        thesis.clear_updaters()
+
+        # The two labels merge into ONE STRUCTURE, on the bottom side.
+        structure = under(label(words["structure"], LINE_GOLD, size=28),
+                          scale, angle, center, 0.51)
+        merged = structure.copy()
+        self.play(
+            ReplacementTransform(classroom, structure),
+            ReplacementTransform(thesis, merged),
+            FadeOut(ghost),
+            env.animate.set_stroke(CUSP_COLOR),
+            run_time=1.4,
+        )
+        self.remove(merged)
+        self.play(env.animate.set_stroke(CHALK), run_time=0.8)
         self.finish_clip(clip)
         # Everything goes except the circle, which the ending builds on.
         self.play(FadeOut(Group(*[m for m in self.mobjects if m is not circle])), run_time=1.5)

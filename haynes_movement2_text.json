@@ -95,14 +95,16 @@
       "5"
     ],
     "simson_line": "SIMSON LINE",
-    "curve_label": "THREE-CUSPIDED QUARTIC",
+    "classroom_label": "CLASSROOM GEOMETRY",
+    "thesis_label": "THESIS GEOMETRY",
     "structure": "ONE STRUCTURE",
     "cues": {
       "point": "Pick any point",
       "line": "The three feet",
       "sweep": "As the point travels",
       "same": "It is the same",
-      "structure": "Classroom geometry"
+      "structure": "Classroom geometry",
+      "one": "one structure"
     }
   },
   "ending": {
