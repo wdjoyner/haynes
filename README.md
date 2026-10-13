@@ -164,9 +164,11 @@ coordinates carries Haynes's three-cusped quartic exactly onto the deltoid.
 
 ## Credits
 
-Written and directed by David Joyner. Curve code by Edray Goins and David
-Joyner, from Goins's original Mathematica program. Narration drawn from E. L.
-Haynes, "Mathematics — Symbolic Logic," address to teachers of mathematics,
-Washington, D.C., 1945 (transcription by D. Pierce). With thanks to John
-Stigall, Edray Goins, and the librarians of the Catholic University of
-America. Sources are listed in the film's end credits.
+Written by David Joyner and Claude (Anthropic). Directed and produced by David
+Joyner. Animation code by David Joyner and Claude (Anthropic); curve code from
+Haynes's thesis by Edray Goins and David Joyner, from Goins's original
+Mathematica program. Narration drawn from E. L. Haynes, "Mathematics — Symbolic
+Logic," address to teachers of mathematics, Washington, D.C., 1945
+(transcription by D. Pierce). With thanks to John Stigall (Howard University),
+Edray Goins (Pomona College), and the librarians of the Catholic University of
+America. Sources and further reading are listed in the film's end credits.
