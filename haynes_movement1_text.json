@@ -177,11 +177,39 @@
     ],
     [
       "h",
-      "Written and directed by"
+      "Written by"
+    ],
+    [
+      "t",
+      "David Joyner and Claude (Anthropic)"
+    ],
+    [
+      "h",
+      "Directed and produced by"
     ],
     [
       "t",
       "David Joyner"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "h",
+      "Animation code"
+    ],
+    [
+      "t",
+      "David Joyner and Claude (Anthropic)"
+    ],
+    [
+      "h",
+      "Curve code from Haynes’s thesis"
+    ],
+    [
+      "t",
+      "Edray Goins and David Joyner"
     ],
     [
       "",
@@ -217,11 +245,43 @@
     ],
     [
       "s",
-      "The Haynes–Lofton Family Papers,"
+      "E. L. Haynes, Determination of Sets of Independent"
     ],
     [
       "s",
-      "Catholic University of America"
+      "Conditions Characterizing Certain Special Cases"
+    ],
+    [
+      "s",
+      "of Symmetric Correspondences, Ph.D. dissertation,"
+    ],
+    [
+      "s",
+      "Catholic University of America, 1943"
+    ],
+    [
+      "s",
+      "D. Pierce, transcription of the 1945 address"
+    ],
+    [
+      "",
+      ""
+    ],
+    [
+      "h",
+      "Further reading"
+    ],
+    [
+      "s",
+      "J. Stigall, “Euphemia Haynes’ philosophy"
+    ],
+    [
+      "s",
+      "of mathematics and mathematics education,”"
+    ],
+    [
+      "s",
+      "Journal of Philosophy of Education, 4 March 2026"
     ],
     [
       "s",
@@ -237,7 +297,11 @@
     ],
     [
       "s",
-      "D. Pierce, transcription of the 1945 address"
+      "The Haynes–Lofton Family Papers,"
+    ],
+    [
+      "s",
+      "Catholic University of America"
     ],
     [
       "",
@@ -249,19 +313,15 @@
     ],
     [
       "t",
-      "John Stigall"
+      "John Stigall (Howard University)"
+    ],
+    [
+      "t",
+      "Edray Goins (Pomona College)"
     ],
     [
       "s",
       "and the librarians of the Catholic University of America"
-    ],
-    [
-      "t",
-      "Edray Goins"
-    ],
-    [
-      "s",
-      "for his code for the curves of Haynes’s 1943 thesis"
     ],
     [
       "",
@@ -269,11 +329,15 @@
     ],
     [
       "h",
-      "Animation"
+      "Software"
     ],
     [
       "t",
       "Manim Community Edition"
+    ],
+    [
+      "t",
+      "SageMath"
     ],
     [
       "h",
