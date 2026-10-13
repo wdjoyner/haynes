@@ -21,6 +21,8 @@ Low-resolution preview, then 1080p::
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from manim import *
 
 import haynes_movement1 as lesson1
@@ -39,10 +41,33 @@ class HaynesFilm(lesson2.MovementTwoScene, lesson1.HaynesMovementOne):
         ]
 
     def construct(self):
+        self.mark_chapter("title")
         self.title_card()
+        self.mark_chapter("lesson1")
         self.lesson_one()
         if self.mobjects:                  # anything Lesson I left on screen
             self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
             self.clear()
         self.lesson_two()
+        self.mark_chapter("credits")
         self.end_credits()
+        self.write_chapters()
+
+    def write_chapters(self):
+        """Write youtube_chapters.txt: chapter times to paste into the description.
+
+        The times come from this render, so they match the narration it
+        used. YouTube needs the first at 0:00, at least three chapters, and
+        each at least ten seconds long.
+        """
+        names = lesson2.TEXT["film"]["chapters"]
+        lines = []
+        for seconds, key in self._chapters:
+            whole = int(seconds)
+            stamp = (f"{whole // 3600}:{whole % 3600 // 60:02d}:{whole % 60:02d}"
+                     if whole >= 3600 else f"{whole // 60}:{whole % 60:02d}")
+            lines.append(f"{stamp} {names[key]}")
+        out = Path(__file__).resolve().parent / "youtube_chapters.txt"
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print("Chapters for YouTube (also in youtube_chapters.txt):")
+        print("\n".join(lines))

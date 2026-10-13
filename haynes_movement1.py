@@ -423,6 +423,11 @@ class NarratedScene(Scene):
         super().setup()
         self._audio_manifest = self._load_audio_manifest()
         self._clip_starts: dict[str, float] = {}
+        self._chapters: list[tuple[float, str]] = []
+
+    def mark_chapter(self, key: str):
+        """Note that a chapter (for the YouTube description) starts now."""
+        self._chapters.append((self.renderer.time, key))
 
     def narration_sources(self) -> list[tuple[Path, dict, str]]:
         """(audio folder, text, script that generates the audio) per lesson."""
@@ -540,10 +545,15 @@ class HaynesMovementOne(NarratedScene):
         self.camera.background_color = "#10131a"
         self._opening_transition = None
         self.opening_computation_to_structure()
+        self.mark_chapter("reason")
         self.scene_answer_to_reason()
+        self.mark_chapter("inquiry")
         self.scene_inquiry_epicycloid()
+        self.mark_chapter("constant_variable")
         self.scene_constant_variable()
+        self.mark_chapter("relationships")
         self.scene_relationships()
+        self.mark_chapter("freedom")
         self.scene_degrees_of_freedom()
 
     # ------------------------------------------------------------------

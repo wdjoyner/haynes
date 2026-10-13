@@ -23,7 +23,7 @@ import json
 import wave
 from pathlib import Path
 
-from generate_movement1_audio import SAMPLE_RATE, load_narration, synthesize
+from generate_movement1_audio import SAMPLE_RATE, load_narration, load_sentences, synthesize
 
 HERE = Path(__file__).resolve().parent
 TEXT_PATH = HERE / "haynes_movement2_text.json"
@@ -89,7 +89,8 @@ def main() -> None:
             write_silence(wav_path, duration)
         else:
             print(f"Synthesizing {clip_id}...")
-            audio, segments = synthesize(pipeline, text, args.voice, args.speed)
+            audio, segments = synthesize(pipeline, load_sentences(TEXT_PATH)[clip_id],
+                                         args.voice, args.speed)
             sf.write(wav_path, audio, SAMPLE_RATE, subtype="PCM_16")
             duration = len(audio) / SAMPLE_RATE
         manifest["clips"][clip_id] = {

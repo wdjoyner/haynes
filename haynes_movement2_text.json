@@ -42,8 +42,21 @@
     "subtitle": "DISCOVERY"
   },
   "film": {
-    "_note": "Used only by HaynesFilm (haynes_film.py), which plays both lessons with one set of credits.",
-    "lessons_credit": "Lessons I and II"
+    "_note": "Used only by HaynesFilm (haynes_film.py), which plays both lessons with one set of credits. 'chapters' names the YouTube chapters; their times are written to youtube_chapters.txt by each render.",
+    "lessons_credit": "Lessons I and II",
+    "chapters": {
+      "title": "Title",
+      "lesson1": "Lesson I: Beyond Computation",
+      "reason": "Understanding, not imposing",
+      "inquiry": "Inquiry",
+      "constant_variable": "Constant and variable",
+      "relationships": "Relationships",
+      "freedom": "Degrees of freedom",
+      "lesson2": "Lesson II: Discovery — points and tangent lines",
+      "simson": "Simson lines of the 3-4-5 triangle",
+      "door": "The limit and the open door",
+      "credits": "Credits"
+    }
   },
   "duality": {
     "_note": "Scene 11. Haynes's equation is in her own coordinates; the curve on screen is the same curve after a projective change of coordinates.",

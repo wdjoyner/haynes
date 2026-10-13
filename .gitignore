@@ -10,3 +10,6 @@ media/
 
 # macOS
 .DS_Store
+
+# Chapter times written by each render of haynes_film.py
+youtube_chapters.txt

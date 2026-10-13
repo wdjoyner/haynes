@@ -389,9 +389,12 @@ class MovementTwoScene(NarratedScene):
     def lesson_two(self):
         """Lesson II, title and scenes built so far (the film reuses this)."""
         self.camera.background_color = BACKGROUND
+        self.mark_chapter("lesson2")
         self.lesson_two_title()
         self.scene_duality()
+        self.mark_chapter("simson")
         circle = self.scene_simson_closing()
+        self.mark_chapter("door")
         self.scene_limit_and_door(circle)
 
     def lesson_two_title(self):
