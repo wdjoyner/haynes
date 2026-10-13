@@ -93,9 +93,11 @@ python generate_movement1_audio.py --voice af_heart --speed 0.94
 python generate_movement2_audio.py --voice af_heart --speed 0.94
 ```
 
-Run these again whenever you change any `narration` text. The animation reads
-the clip lengths and sentence start times from the manifests, so it stays in
-sync on its own.
+Run these again whenever you change any `narration` text. Kokoro speaks each
+sentence separately, with a short pause between them (given a long passage
+in one piece, it tends to rush or drop words). The manifests record each
+clip's length and every sentence's start time, and the animation reads them,
+so it stays in sync on its own.
 
 To preview Lesson II before recording, `python generate_movement2_audio.py
 --placeholder` writes silent clips of estimated length in a few seconds.
@@ -113,6 +115,13 @@ manim -pql haynes_movement2.py SimsonClosing         # just the Simson lines
 ```
 
 If a narration manifest is missing, the render stops and names the script to run.
+
+### 5. Chapters for YouTube
+
+Each render of `HaynesFilm` prints chapter times and writes them to
+`youtube_chapters.txt`, ready to paste into the video description. They come
+from that render's narration, so render with the final narration first. The
+chapter names are in `haynes_movement2_text.json` under `film.chapters`.
 
 ## Editing the words
 
