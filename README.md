@@ -164,7 +164,7 @@ coordinates carries Haynes's three-cusped quartic exactly onto the deltoid.
 
 ## Credits
 
-Written by David Joyner and Claude (Anthropic). Directed and produced by David
+Narration written by David Joyner and Claude (Anthropic). Directed and produced by David
 Joyner. Animation code by David Joyner and Claude (Anthropic); curve code from
 Haynes's thesis by Edray Goins and David Joyner, from Goins's original
 Mathematica program. Narration drawn from E. L. Haynes, "Mathematics — Symbolic
