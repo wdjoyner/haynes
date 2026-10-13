@@ -462,7 +462,19 @@ class NarratedScene(Scene):
         path = Path(clip["_dir"]) / clip["file"]
         if not path.exists():
             raise FileNotFoundError(path)
-        self.add_sound(str(path))
+        # Manim drops any sound added while it is "skipping", and it counts
+        # as skipping from the end of an animation it took from its cache
+        # until the next animation starts -- exactly when narration starts.
+        # So, unless skipping was really asked for (e.g. `manim -s`), turn
+        # it off while the sound is added.
+        renderer = self.renderer
+        was_skipping = renderer.skip_animations
+        if not getattr(renderer, "_original_skipping_status", False):
+            renderer.skip_animations = False
+        try:
+            self.add_sound(str(path))
+        finally:
+            renderer.skip_animations = was_skipping
         self._clip_starts[clip_id] = self.renderer.time
         return float(clip["duration"])
 
