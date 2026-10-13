@@ -116,5 +116,5 @@ Each Movement II beat waits for the sentence that describes it (found by the
 - The scene is plain 2-D (`Scene`, not `ThreeDScene`) so z-index layering is reliable: the opaque door always hides what is behind it.
 - Both doors use `SwingingDoor`, a hinged panel with fake perspective. The final door reads MATH while closed and swings open to reveal LIFE.
 - `CurveText` lays a word along any curve (or any function `t -> point`), reading left to right; `write_along` reveals its letters in step with the curve being drawn; calling `place_on` from an updater lets a word ride a moving curve (VARIABLE on the changing circle).
-- Film order: title card → opening → five scenes → LIFE / OPPORTUNITY / FREEDOM finale → end credits.
+- Film order (`haynes_film.py`): title card → Lesson I (opening, five scenes, ending on 3-D MORE POSSIBILITIES) → Lesson II (duality, Simson lines, polygons closing in on a circle that becomes the MATH door) → LIFE / OPPORTUNITY / FREEDOM → end credits → “We will teach … inspire.”
 - To change wording, edit `haynes_movement1_text.json` only. If you change any `narration`, rerun `generate_movement1_audio.py`; the animation picks up the new clip lengths automatically.

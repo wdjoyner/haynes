@@ -38,7 +38,9 @@ import numpy as np
 from manim import *
 
 import haynes_curves as hc
-from haynes_movement1 import CHALK, DOOR_LIGHT, CurveText, NarratedScene, write_along
+import haynes_movement1 as lesson1
+from haynes_movement1 import (CHALK, DOOR_LIGHT, DOOR_OPEN_ANGLE, CurveText, NarratedScene,
+                              SwingingDoor, write_along)
 
 HERE = Path(__file__).resolve().parent
 AUDIO_DIR = HERE / "audio" / "movement2"
@@ -389,7 +391,8 @@ class MovementTwoScene(NarratedScene):
         self.camera.background_color = BACKGROUND
         self.lesson_two_title()
         self.scene_duality()
-        self.scene_simson_closing()
+        circle = self.scene_simson_closing()
+        self.scene_limit_and_door(circle)
 
     def lesson_two_title(self):
         """LESSON II and its subtitle, styled like Lesson I's title."""
@@ -742,8 +745,78 @@ class MovementTwoScene(NarratedScene):
         structure.place_on(top_arc, 0.05, 0.95, normal_offset=0.15)
         self.play(write_along(structure), run_time=1.6)
         self.finish_clip(clip)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.5)
+        # Everything goes except the circle, which the ending builds on.
+        self.play(FadeOut(Group(*[m for m in self.mobjects if m is not circle])), run_time=1.5)
         self.clear()
+        self.add(circle)
+        return circle
+
+    # ------------------------------------------------------------------
+    # Ending: polygons close in on the circle; the circle becomes the door
+    # ------------------------------------------------------------------
+
+    def scene_limit_and_door(self, circle: Circle):
+        """Regular polygons approach the circle (a limit); then the door finale.
+
+        The circle is the Simson circle, carried over from the closing. It
+        moves to where the door will stand; inscribed polygons with more and
+        more sides close in on it; then it becomes the door frame, as the
+        circle at the start of Lesson I did. The MATH door opens on "open
+        paths", and LIFE -> OPPORTUNITY -> FREEDOM follows (Lesson I's finale).
+        """
+        clip = "m2_closing_door"
+        words = self.text["ending"]
+        cue = words["cues"]
+        self.start_narration(clip)
+
+        door_center = np.array([0.0, -0.55, 0.0])
+        radius = 2.3
+        self.play(circle.animate.set_stroke(CHALK, width=3, opacity=1.0)
+                        .scale_to_fit_width(2 * radius).move_to(door_center), run_time=1.2)
+
+        def polygon(n):
+            return RegularPolygon(n, radius=radius, start_angle=PI / 2).move_to(door_center) \
+                .set_stroke(LINE_GOLD, width=3)
+
+        def label(n):
+            return MathTex(f"n = {n}", color=LINE_GOLD).scale(0.85).to_corner(UR, buff=0.7)
+
+        sides = words["polygon_sides"]
+        shape, tag = polygon(sides[0]), label(sides[0])
+        self.play(Create(shape), FadeIn(tag), run_time=1.0)
+        steps = max(self.time_until(clip, cue["never"]) - 0.6, 0.6 * (len(sides) - 1))
+        per = steps / (len(sides) - 1)
+        for n in sides[1:]:
+            self.play(Transform(shape, polygon(n)), Transform(tag, label(n)),
+                      run_time=per, rate_func=smooth)
+
+        # LIMIT is written around the circle as the polygon merges into it.
+        limit = CurveText(words["limit"], font_size=30, weight=BOLD, color=CHALK)
+        limit.place_on(lesson1.ring(radius + 0.05, door_center), 0.17, 0.33, normal_offset=0.3)
+        self.play(write_along(limit), shape.animate.set_stroke(opacity=0.0),
+                  FadeOut(tag), run_time=1.6)
+        self.remove(shape)
+
+        # The circle becomes the door frame; the MATH door opens.
+        self.wait_for(clip, cue["door"], lead=0.4)
+        frame = RoundedRectangle(width=4.3, height=5.2, corner_radius=0.08)
+        frame.move_to(door_center).set_z_index(6).set_stroke(CHALK, width=3)
+        glow = Rectangle(width=4.0, height=4.9).move_to(door_center)
+        glow.set_fill(DOOR_LIGHT, opacity=0.0).set_stroke(opacity=0)
+        glow.set_z_index(1)
+        door = SwingingDoor(width=4.0, height=4.9, center=door_center,
+                            label=lesson1.TEXT["freedom"]["door"], label_size=50)
+        self.add(glow)
+        self.play(ReplacementTransform(circle, frame), FadeOut(limit),
+                  FadeIn(door.mobjects), run_time=1.7)
+        self.wait_for(clip, cue["open"], lead=0.2)
+        self.play(door.opening.animate.set_value(DOOR_OPEN_ANGLE),
+                  glow.animate.set_fill(opacity=0.38), run_time=3.0, rate_func=smooth)
+        door.freeze()
+        lesson1.HaynesMovementOne.finale_life_opportunity_freedom(
+            self, glow, frame, door.mobjects, VGroup(), door_center)
+        self.finish_clip(clip, minimum_pause=0.25)
+        self.wait(0.8)
 
     @staticmethod
     def envelope_mob(geo: SimsonPicture) -> VGroup:

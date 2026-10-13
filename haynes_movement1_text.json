@@ -45,8 +45,7 @@
       "On a line it gains one direction.",
       "On a plane it gains another.",
       "In space, possibility expands again.",
-      "This gives us a visual metaphor for the larger promise of education: knowledge can open paths that were previously closed.",
-      "Mathematics can become an open door."
+      "Each new direction opens more possibilities."
     ]
   },
   "_lessons_credit_note": "Fills the {lessons} line of the credits when Lesson I is rendered on its own; the full film uses film.lessons_credit in haynes_movement2_text.json.",
@@ -117,11 +116,19 @@
     "zero": "0",
     "one_degree": "1 DEGREE OF FREEDOM",
     "two_degrees": "2 DEGREES OF FREEDOM",
+    "three_degrees": "3 DEGREES OF FREEDOM",
     "possibilities": "MORE POSSIBILITIES",
     "door": "MATH",
     "life": "LIFE",
     "opportunity": "OPPORTUNITY",
-    "freedom": "FREEDOM"
+    "freedom": "FREEDOM",
+    "_cues_note": "Each step waits for these words to be spoken (m1_05_freedom); keep them word-for-word the same as in the narration. The door words (door, life, opportunity, freedom) are used by the film's ending, after Lesson II.",
+    "cues": {
+      "line": "On a line",
+      "plane": "On a plane",
+      "space": "In space",
+      "possibilities": "more possibilities"
+    }
   },
   "credits": [
     [

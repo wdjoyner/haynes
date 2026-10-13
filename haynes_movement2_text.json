@@ -27,6 +27,13 @@
       "As the point travels once around the circle, its Simson lines sweep out a curve.",
       "It is the same three-cuspided quartic.",
       "Classroom geometry and thesis geometry turn out to be one structure."
+    ],
+    "m2_closing_door": [
+      "Haynes found another picture of what teaching aims for in the idea of a limit.",
+      "A polygon inscribed in a circle, with more and more sides, comes ever closer to the circle.",
+      "It never quite arrives, yet every step brings it nearer.",
+      "This gives us a visual metaphor for the larger promise of education: knowledge can open paths that were previously closed.",
+      "Mathematics can become an open door."
     ]
   },
   "title": {
@@ -44,8 +51,16 @@
     "caption": "Haynes, 1943: a three-cuspided quartic",
     "curve_title": "POINTS",
     "dual_title": "TANGENT LINES",
-    "curve_counts": ["degree {degree}", "cusps {cusps}", "bitangents {bitangents}"],
-    "dual_counts": ["degree {class}", "flexes {cusps}", "nodes {bitangents}"],
+    "curve_counts": [
+      "degree {degree}",
+      "cusps {cusps}",
+      "bitangents {bitangents}"
+    ],
+    "dual_counts": [
+      "degree {class}",
+      "flexes {cusps}",
+      "nodes {bitangents}"
+    ],
     "relation": "RELATION",
     "invariance": "INVARIANCE",
     "structure": "STRUCTURE",
@@ -61,7 +76,11 @@
   },
   "simson": {
     "_note": "Closing. The 3-4-5 triangle of Lesson I; side labels in the same places as there.",
-    "side_labels": ["4", "3", "5"],
+    "side_labels": [
+      "4",
+      "3",
+      "5"
+    ],
     "simson_line": "SIMSON LINE",
     "curve_label": "THREE-CUSPIDED QUARTIC",
     "structure": "ONE STRUCTURE",
@@ -71,6 +90,25 @@
       "sweep": "As the point travels",
       "same": "It is the same",
       "structure": "Classroom geometry"
+    }
+  },
+  "ending": {
+    "_note": "The film's ending, after the Simson lines. The first three narration sentences (m2_closing_door) are a draft; check them against the limit passage of the 1945 address. The door words (MATH, LIFE, OPPORTUNITY, FREEDOM) are in haynes_movement1_text.json under 'freedom'.",
+    "limit": "LIMIT",
+    "polygon_sides": [
+      3,
+      4,
+      5,
+      6,
+      8,
+      12,
+      24,
+      48
+    ],
+    "cues": {
+      "never": "It never quite arrives",
+      "door": "This gives us",
+      "open": "knowledge can open paths"
     }
   },
   "quotations": {

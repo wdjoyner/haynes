@@ -336,6 +336,73 @@ class SwingingDoor:
             m.clear_updaters()
 
 
+class FloorPerspective:
+    """A flat plane seen as a floor in one-point perspective.
+
+    The plane's y direction runs away from the viewer toward a horizon;
+    vertical lines stay vertical (the camera is level), so a point raised
+    off the floor moves straight up on screen. ``blend`` interpolates
+    between the flat plane (0) and the floor (1).
+    """
+
+    def __init__(self, horizon: float = 0.95, eye_height: float = 1.6,
+                 focal: float = 4.5, near: float = 2.0, y_min: float = -3.0):
+        self.horizon, self.h, self.f = horizon, eye_height, focal
+        self.near, self.y_min = near, y_min
+
+    def _depth(self, q) -> float:
+        return q[1] - self.y_min + self.near
+
+    def screen(self, q) -> np.ndarray:
+        z = self._depth(q)
+        return np.array([self.f * q[0] / z, self.horizon - self.f * self.h / z, 0.0])
+
+    def lift(self, q, height: float) -> np.ndarray:
+        """Screen offset of a point *height* above the floor at q."""
+        return np.array([0.0, self.f * height / self._depth(q), 0.0])
+
+    def blend(self, q, a: float) -> np.ndarray:
+        q = np.asarray(q, dtype=float)
+        return (1 - a) * q + a * self.screen(q)
+
+
+class ExtrudedWord:
+    """A word drawn as solid block letters, by stacking layers in perspective.
+
+    Copies of the word shrink toward a vanishing point below the frame,
+    darker toward the back, with the front face on top. The result reads
+    as 3-D lettering seen from slightly below, while the scene stays 2-D.
+    :meth:`at` returns the word partway through growing out of a point.
+    """
+
+    LAYERS = 44
+    DEPTH = 0.085                  # back face is 8.5% closer to the vanishing point
+    VANISH = np.array([0.0, -7.5, 0.0])
+    BACK, SIDE = "#2a251c", "#a08a58"
+
+    def __init__(self, text: str, font_size: float = 66):
+        self.face = Text(text, weight=BOLD, font_size=font_size, color=CHALK)
+        self.face.move_to(ORIGIN)
+        self.sides = [interpolate_color(ManimColor(self.BACK), ManimColor(self.SIDE),
+                                        i / (self.LAYERS - 1)) for i in range(self.LAYERS)]
+
+    def at(self, g: float, source, target, zoom: float = 1.0) -> VGroup:
+        """The word at growth g in [0, 1]: from a speck at *source* to full size at *target*."""
+        g = float(np.clip(g, 0.0, 1.0))
+        center = np.asarray(source) + g * (np.asarray(target) - np.asarray(source))
+        size = (0.03 + 0.97 * g) * zoom
+        front = self.face.copy().scale(size).move_to(center)
+        group = VGroup()
+        depth = self.DEPTH * g
+        for i, color in enumerate(self.sides):
+            k = 1 - depth * (1 - i / (self.LAYERS - 1))
+            layer = front.copy().scale(k, about_point=self.VANISH)
+            group.add(layer.set_fill(color, opacity=1).set_stroke(width=0))
+        front.set_stroke("#10131a", width=1.2)
+        group.add(front)
+        return group
+
+
 # ---------------------------------------------------------------------------
 # Narrated scene base
 # ---------------------------------------------------------------------------
@@ -977,77 +1044,100 @@ class HaynesMovementOne(NarratedScene):
     # ------------------------------------------------------------------
 
     def scene_degrees_of_freedom(self):
-        dur = self.start_narration("m1_05_freedom")
-        elapsed = 0.0
+        """0, 1, 2, then 3 degrees of freedom; MORE POSSIBILITIES rises out of space.
+
+        Lesson I ends here, on an open note: the door finale (MATH -> LIFE ->
+        OPPORTUNITY -> FREEDOM) now closes the whole film, after Lesson II.
+        """
+        clip = "m1_05_freedom"
+        self.start_narration(clip)
+        words = TEXT["freedom"]
+        cue = words["cues"]
 
         p = Dot(radius=0.14)
-        zero = Text(TEXT["freedom"]["zero"], font_size=28).next_to(p, DOWN)
+        zero = Text(words["zero"], font_size=28).next_to(p, DOWN)
         self.play(FadeIn(p), FadeIn(zero), run_time=0.8)
-        self.wait(0.5)
-        elapsed += 1.3
 
+        self.wait_for(clip, cue["line"], lead=0.3)
         line = Line(LEFT * 5, RIGHT * 5)
-        one = Text(TEXT["freedom"]["one_degree"], font_size=28).to_edge(UP)
+        one = Text(words["one_degree"], font_size=28).to_edge(UP)
         self.play(Create(line), Transform(zero, one), run_time=1.3)
-        self.play(p.animate.shift(4 * RIGHT), run_time=2.0)
-        self.play(p.animate.shift(7 * LEFT), run_time=2.2)
-        elapsed += 5.5
+        self.play(p.animate.shift(4 * RIGHT), run_time=1.6)
+        self.play(p.animate.shift(7 * LEFT), run_time=1.8)
 
+        self.wait_for(clip, cue["plane"], lead=0.3)
         plane = NumberPlane(
             x_range=[-6, 6, 1],
             y_range=[-3, 3, 1],
             background_line_style={"stroke_opacity": 0.25},
         )
-        two = Text(TEXT["freedom"]["two_degrees"], font_size=28).to_edge(UP)
+        two = Text(words["two_degrees"], font_size=28).to_edge(UP)
         self.play(FadeOut(line), FadeIn(plane), Transform(zero, two), run_time=1.4)
-        self.play(p.animate.move_to([3.5, 2.0, 0]), run_time=1.5)
-        self.play(p.animate.move_to([-2.5, -1.5, 0]), run_time=1.5)
-        elapsed += 4.4
+        self.play(p.animate.move_to([3.5, 2.0, 0]), run_time=1.3)
+        self.play(p.animate.move_to([-2.5, -1.5, 0]), run_time=1.3)
 
-        possibilities = Text(TEXT["freedom"]["possibilities"], weight=BOLD, font_size=36)
-        self.play(FadeIn(possibilities), run_time=1.0)
-        self.play(possibilities.animate.scale(1.25), run_time=1.0)
-        elapsed += 2.0
+        # In space: the plane tilts back into a floor, a vertical axis rises
+        # from it, and the point lifts off the floor.
+        self.wait_for(clip, cue["space"], lead=0.3)
+        floor = FloorPerspective()
+        tilt = ValueTracker(0.0)
+        flat = plane.copy()
+        self.remove(plane)
+        plane = always_redraw(lambda: flat.copy().apply_function(
+            lambda q: floor.blend(q, tilt.get_value())))
+        self.add(plane)
+        world = np.array([-2.5, -1.5, 0.0])          # the point, on the floor
+        height = ValueTracker(0.0)
+        p.add_updater(lambda m: m.move_to(
+            floor.blend(world, tilt.get_value()) + floor.lift(world, height.get_value())))
+        three = Text(words["three_degrees"], font_size=28).to_edge(UP)
+        self.play(tilt.animate.set_value(1.0), Transform(zero, three), run_time=1.6)
 
+        z_axis = Line(floor.screen(ORIGIN), floor.screen(ORIGIN) + floor.lift(ORIGIN, 3.4))
+        z_axis.set_stroke(BLUE_D, width=2)
+        drop = always_redraw(lambda: DashedLine(
+            floor.screen(world), p.get_center(), dash_length=0.08,
+        ).set_stroke(WHITE, 1.5, 0.5) if height.get_value() > 0.05 else VMobject())
+        self.add(drop)
+        self.play(Create(z_axis), height.animate.set_value(2.4), run_time=1.6)
+        tour = [np.array([2.0, 1.2, 0.0]), np.array([0.4, -0.6, 0.0])]
+        for target, h in zip(tour, (1.7, 2.9)):
+            start = world.copy()
+            self.play(
+                UpdateFromAlphaFunc(Mobject(), lambda _, a, s0=start, s1=target:
+                                    world.__setitem__(slice(None), s0 + smooth(a) * (s1 - s0))),
+                height.animate.set_value(h),
+                run_time=1.3,
+            )
+
+        # MORE POSSIBILITIES grows out of the point, with solid lettering.
+        self.wait_for(clip, cue["possibilities"], lead=0.4)
+        origin_pt = p.get_center()
+        p.clear_updaters()
+        word = ExtrudedWord(words["possibilities"], font_size=66)
+        grow = ValueTracker(0.0)
+        title = always_redraw(lambda: word.at(grow.get_value(), origin_pt, np.array([0.0, 0.9, 0.0])))
+        self.add(title)
         self.play(
-            FadeOut(VGroup(plane, p, zero)),
-            possibilities.animate.to_edge(UP),
-            run_time=1.0,
-        )
-        elapsed += 1.0
-
-        # The door reads MATH while closed. Behind it there is only light;
-        # LIFE is printed into the doorway after the door has opened.
-        door_center = np.array([0.0, -0.55, 0.0])
-        frame = RoundedRectangle(width=4.3, height=5.2, corner_radius=0.08)
-        frame.move_to(door_center).set_z_index(6)
-        glow = Rectangle(width=4.0, height=4.9).move_to(door_center)
-        glow.set_fill(DOOR_LIGHT, opacity=0.0).set_stroke(opacity=0)
-        glow.set_z_index(1)
-        door = SwingingDoor(width=4.0, height=4.9, center=door_center,
-                            label=TEXT["freedom"]["door"], label_size=50)
-
-        self.add(glow)
-        self.play(Create(frame), FadeIn(door.mobjects), run_time=1.7)
-        elapsed += 1.7
-        self.wait(0.7)
-        elapsed += 0.7
-
-        self.play(
-            door.opening.animate.set_value(DOOR_OPEN_ANGLE),
-            glow.animate.set_fill(opacity=0.38),
+            grow.animate.set_value(1.0),
+            FadeOut(VGroup(p, zero, z_axis, drop), run_time=1.2),
+            plane.animate.set_stroke(opacity=0.0),
             run_time=3.0,
-            rate_func=smooth,
+            rate_func=rate_functions.ease_out_cubic,
         )
-        door.freeze()
-        elapsed += 3.0
+        self.remove(drop, plane)
 
-        elapsed += self.finale_life_opportunity_freedom(
-            glow, frame, door.mobjects, possibilities, door_center,
-        )
-
-        self.finish_narration(dur, elapsed, minimum_pause=0.25)
-        self.wait(0.8)
+        # Hold, drifting gently toward the viewer, until the lesson's last words.
+        push = ValueTracker(1.0)
+        held = always_redraw(lambda: word.at(1.0, origin_pt, np.array([0.0, 0.9, 0.0]),
+                                             zoom=push.get_value()))
+        self.remove(title)
+        self.add(held)
+        end = self._clip_starts[clip] + self.narration_duration(clip)
+        hold = max(end - self.renderer.time + 1.2, 1.5)
+        self.play(push.animate.set_value(1.07), run_time=hold, rate_func=linear)
+        self.play(FadeOut(held), run_time=1.0)
+        self.remove(held)
 
     # ------------------------------------------------------------------
     # Finale: LIFE -> OPPORTUNITY -> FREEDOM
